@@ -1,15 +1,40 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { Button, Input, TextField } from "@mui/material";
+import { renderRandomTemplate } from "./TextGenerator";
 
 function App() {
   const [currentJob, setCurrentJob] = React.useState("");
   const [newJobPosition, setNewJobPosition] = React.useState("");
   const [newJobCompany, setNewJobCompany] = React.useState("");
   const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [genereatedText, setGeneratedText] = React.useState("");
 
-  console.log(isSubmitted);
+  const [width, setWidth] = React.useState<number>(window.innerWidth);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener("resize", handleWindowSizeChange);
+    return () => {
+      window.removeEventListener("resize", handleWindowSizeChange);
+    };
+  }, []);
+
+  const isMobile = width <= 768;
+
+  const submitHandler = (e: any) => {
+    const generatedTemplate = renderRandomTemplate(
+      currentJob,
+      newJobPosition,
+      newJobCompany
+    );
+    setGeneratedText(generatedTemplate);
+    setIsSubmitted(true);
+  };
+  console.log(currentJob);
   return (
     <div className="App">
       {!isSubmitted ? (
@@ -25,7 +50,7 @@ function App() {
           >
             <TextField
               id="outlined-basic"
-              label="Current Job"
+              label="Old Company"
               variant="outlined"
               onChange={(e) => setCurrentJob(e.target.value)}
             />
@@ -44,25 +69,56 @@ function App() {
           </div>
           <br />
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" onClick={(e) => setIsSubmitted(true)}>
+            <Button variant="contained" onClick={submitHandler}>
               Submit
             </Button>
           </div>
         </>
       ) : (
-        <div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           {" "}
-          <p>
-            Everybody, stop what you’re doing and read about me. Yesterday I
-            quit my amazing dream job at {currentJob}, simply because I was
-            offered something with a much higher pay. I want to thank my mom and
-            dad, my amazing co-workers (I would tag you, but I don’t remember
-            you all), I couldn’t have done this without you. Now I’m ready for
-            new challenges as a {newJobPosition} at {newJobCompany}.
+          <h2 style={{ textAlign: "center" }}>
+            The <span style={{ color: "#2867B2" }}>LinkedIn</span> job update
+            generator
+          </h2>
+          <p
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
+              padding: "20px",
+              border: "1px solid black",
+              fontSize: "25px",
+              margin: isMobile ? `40px` : `40px 400px`,
+            }}
+          >
+            {genereatedText}
           </p>
-          <Button onClick={(e) => setIsSubmitted(false)} variant="contained">
-            Try again?
-          </Button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
+              margin: "15px",
+            }}
+          >
+            <Button onClick={(e) => setIsSubmitted(false)} variant="contained">
+              Try again?
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                navigator.clipboard.writeText(genereatedText);
+              }}
+            >
+              Copy
+            </Button>
+          </div>
+          <img
+            src="https://previews.123rf.com/images/chagin/chagin1205/chagin120500102/13462171-portr%C3%A4t-der-selbstbewusste-junge-gesch%C3%A4ftsleute-mit-daumen-nach-oben-anmelden.jpg"
+            alt="job-photo"
+          />
         </div>
       )}
     </div>
